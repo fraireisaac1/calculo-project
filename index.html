@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body{
+            margin:0;
+            background-image:linear-gradient(silver, gray);
+        }
+        div.container{
+            width:80%;
+            height:100vh;
+            background-color:gray;
+            margin:auto;
+            border-radius:2em;
+            background-image:linear-gradient(magenta, purple);
+            border: 5px solid #550055;
+        }
+        div.flex{
+            display:flex;
+            flex-wrap:wrap;
+            justify-content:space-evenly;
+            align-items:center;
+            gap:2%;
+        }
+        div.parent{
+            /*border: 1px solid black;*/
+            height:50%;
+            box-sizing:border-box;
+        }
+        div.p0{
+            height:30%;
+            /*border:1px solid red;*/
+        }
+        div.p1{
+            width:70%;
+            float:left;
+        }
+        div.p2{
+            width:30%;
+            float:right;
+            display:flex;
+            flex-direction:column;
+        }
+        div.p3{
+            width:70%;
+            height:20%;
+            float:left;
+            /*border:1px solid red;*/
+        }
+        button.number-buttons{
+            height:20%;
+            flex: 0 0 30%;
+            border-radius:2em;
+            background-image:linear-gradient(cyan, green);
+            font-size:25px;
+            color:maroon;
+        }
+        button.operator-buttons{
+            height:20%;
+            width:30%;
+            flex: 0 0 15%;
+            border-radius:1em;
+            background-image:linear-gradient(pink, red);
+            font-size:2.5em;
+        }
+        button#clear-button{
+            height:70%;
+            flex: 0 0 50%;
+            border-radius:1em;
+            background-image:linear-gradient(cyan, teal);
+            font-size:2.5em;
+        }
+        input.display{
+            height:70%;
+            width:80%;
+            background-image:linear-gradient(white, lightblue);
+            font-size:4em;
+            color:teal;
+            text-align:right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="p0 flex">
+            <input type="text" class="display" maxLength="10" disabled></input>
+        </div>
+        <div class="parent p1 flex" id="num-button-container"></div>
+        <div class="parent p2 flex">
+            <button class="operator-buttons" type="button" id="add">+</button>
+            <button class="operator-buttons" type="button" id="subtract">-</button>
+            <button class="operator-buttons" type="button" id="multiply">*</button>
+            <button class="operator-buttons" type="button" id="divide">/</button>
+            <button class="operator-buttons" type="button" id="equals">=</button>
+        </div>
+        <div class="p3 flex">
+            <button id="clear-button" type="button">Clear</button>
+        </div>
+    </div>
+
+    <script>
+        const calculator = document.querySelector(".container");
+const resultDisplay = document.querySelector(".display");
+const buttons1 = document.getElementById("num-button-container");
+const clear = document.getElementById("clear-button");
+const addButton = document.getElementById("add");
+const subtractButton = document.getElementById("subtract");
+const multiplyButton = document.getElementById("multiply");
+const divideButton = document.getElementById("divide");
+const equalButton = document.getElementById("equals");
+let maxLength = resultDisplay.getAttribute("maxLength");
+resultDisplay.value="0";
+
+let firstNum = null;
+let inputNum = null;
+let operation = null;
+let secondNum = null;
+let result = null;
+
+for(let i = 9; i > -1; i--){
+  const button = document.createElement("button");
+  button.type="button";
+  button.classList.add("number-buttons");
+  button.setAttribute("data-value", i);
+  button.textContent=i;
+  buttons1.appendChild(button);
+}
+
+const numberButton = document.querySelectorAll(".number-buttons");
+
+numberButton.forEach((button) => {
+  //take the string of the data-value attached to the button and save
+  //it as an int (using parseInt()) to the variable dataValue
+  let dataValue = parseInt(button.getAttribute("data-value"));
+  
+  button.addEventListener("click", function(event){
+    if(resultDisplay.value.length < maxLength){
+      if(operation === null){
+        if(firstNum === null || firstNum === 0){
+          firstNum = dataValue;
+        } else{
+          firstNum = parseInt(firstNum.toString().concat(dataValue));
+        }
+        resultDisplay.value = firstNum.toString();
+      } else{
+        if(secondNum === null || secondNum === 0){
+          secondNum = dataValue;
+        } else{
+          secondNum = parseInt(secondNum.toString().concat(dataValue));
+        }
+        resultDisplay.value = secondNum.toString();
+      }
+    }
+  });
+});
+
+function clearValues(){
+  let firstNum = null;
+  let inputNum = null;
+  let operation = null;
+  let secondNum = null;
+  let result = null;
+  
+  resultDisplay.value=0;
+}
+clear.addEventListener("click", function(event){
+  clearValues();
+  resultDisplay.value = 0;
+});
+
+const operatorButtons = document.querySelectorAll(".operator-buttons");
+
+operatorButtons.forEach(button => {
+  button.addEventListener("click", function(event){
+    const thisOperation = event.target.id;
+    //console.log(thisOperation);
+    
+    //apply an operation using a SWITCH (case) only if firstNum is not null and secondNum is null
+    if(firstNum !== null && secondNum === null){
+      switch(thisOperation){
+        case "add":
+          operation = "+";
+          break;
+        case "subtract":
+          operation = "-";
+          break;
+        case  "multiply":
+          operation = "*";
+          break;
+        case "divide":
+          operation = "/";
+          break;
+      }
+      resultDisplay.value = operation;
+    }
+  });
+});
+
+equalButton.addEventListener("click", function(event){
+  if(secondNum !== null){
+    switch(operation){
+      case "+":
+        result = firstNum + secondNum;
+        break;
+      case "-":
+        result = firstNum - secondNum;
+        break;
+      case "*":
+        result = firstNum * secondNum;
+        break;
+      case "/":
+        result = firstNum / secondNum;
+        break;
+    }
+    if (secondNum === 0 && operation ==="/"){
+      alert("That's an oh no no!");
+      resultDisplay.value = 0;
+    }
+    resultDisplay.value = Math.floor(result*100)/100;
+    firstNum = null;
+    inputNum = null;
+    operation = null;
+    secondNum = null;
+    result = null;
+  }
+});
+    </script>
+</body>
+</html>
